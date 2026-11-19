@@ -2,7 +2,11 @@
   <img src="src/assets/logo.svg" alt="OpenWhispr" width="120" />
 </p>
 
-<h1 align="center">OpenWhispr</h1>
+<h1 align="center">NotionWhisper</h1>
+
+<p align="center">
+  <strong>NotionWhisper</strong> is a custom fork of <a href="https://github.com/OpenWhispr/openwhispr">OpenWhispr</a> that stores and syncs your notes directly to your personal <strong>Notion</strong> database without depending on OpenWhispr Cloud API.
+</p>
 
 <p align="center">
   <a href="https://github.com/OpenWhispr/openwhispr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/OpenWhispr/openwhispr?style=flat" alt="License" /></a>
