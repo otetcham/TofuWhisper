@@ -1,4 +1,4 @@
-name: Build NotionWhisper (Windows)
+name: Build TofuWhisper (Windows)
 
 on:
   push:
@@ -52,6 +52,6 @@ jobs:
       - name: Upload Windows Installer Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NotionWhisper-Windows-Exe
+          name: TofuWhisper-Windows-Exe
           path: dist/*.exe
           if-no-files-found: error

@@ -55,6 +55,23 @@ export function serverRefusalMessage(error: unknown): string | null {
 }
 
 async function cloudRequest<T = unknown>(
+  _method: string,
+  _path: string,
+  _body?: unknown,
+  _isPublic?: boolean,
+  _authGenerationOverride?: number,
+  _cache?: "no-store"
+): Promise<T> {
+  throw new CloudApiError(
+    "OpenWhispr Cloud is disabled in TofuWhisper",
+    503,
+    "CLOUD_DISABLED",
+    undefined,
+    false
+  );
+}
+
+async function _disabledCloudRequest<T = unknown>(
   method: string,
   path: string,
   body?: unknown,

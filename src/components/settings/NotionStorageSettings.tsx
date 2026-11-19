@@ -93,7 +93,7 @@ export const NotionStorageSettings: React.FC = () => {
   return (
     <div className="rounded-lg border border-border bg-card p-4 space-y-4">
       <div>
-        <h3 className="text-sm font-semibold">Notion Storage (NotionWhisper)</h3>
+        <h3 className="text-sm font-semibold">Notion Storage (TofuWhisper)</h3>
         <p className="text-xs text-muted-foreground mt-1">
           OpenWhispr Cloud を使わず、個人の Notion データベースへノートを直接保存・同期します。
         </p>

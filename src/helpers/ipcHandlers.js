@@ -15409,11 +15409,18 @@ class IPCHandlers {
 
     ipcMain.handle("gcal-get-upcoming-events", async (_event, windowMinutes, options) => {
       try {
+        let events = await this.googleCalendarManager.getUpcomingEvents(windowMinutes, {
+          includeAllDay: options?.includeAllDay === true,
+        });
+        if (events.length === 0 && this.googleCalendarManager.accounts.size > 0) {
+          await this.googleCalendarManager.syncEvents().catch(() => {});
+          events = await this.googleCalendarManager.getUpcomingEvents(windowMinutes, {
+            includeAllDay: options?.includeAllDay === true,
+          });
+        }
         return {
           success: true,
-          events: await this.googleCalendarManager.getUpcomingEvents(windowMinutes, {
-            includeAllDay: options?.includeAllDay === true,
-          }),
+          events,
         };
       } catch (error) {
         return { success: false, events: [] };

@@ -1,13 +1,13 @@
 {
-  "appId": "com.notionwhisper.app",
+  "appId": "com.tofuwhisper.app",
   "afterPack": "scripts/afterPack.js",
   "extraMetadata": {
     "windowsTrayIdentity": true
   },
-  "productName": "NotionWhisper",
+  "productName": "TofuWhisper",
   "protocols": {
-    "name": "OpenWhispr Protocol",
-    "schemes": ["openwhispr"]
+    "name": "TofuWhisper Protocol",
+    "schemes": ["tofuwhisper"]
   },
   "directories": {
     "output": "dist"

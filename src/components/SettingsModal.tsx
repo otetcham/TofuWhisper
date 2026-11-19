@@ -101,13 +101,15 @@ export default function SettingsModal({
 
   const sidebarItems: SidebarItem<SettingsSectionType>[] = useMemo(
     () =>
-      nav.map(({ id, group }) => ({
-        id,
-        label: t(`settingsModal.sections.${id}.label`),
-        icon: SECTION_ICONS[id],
-        description: t(`settingsModal.sections.${id}.description`),
-        group: t(`settingsModal.groups.${group}`),
-      })),
+      nav
+        .filter(({ id }) => id !== "account" && id !== "plansBilling")
+        .map(({ id, group }) => ({
+          id,
+          label: t(`settingsModal.sections.${id}.label`),
+          icon: SECTION_ICONS[id],
+          description: t(`settingsModal.sections.${id}.description`),
+          group: t(`settingsModal.groups.${group}`),
+        })),
     [nav, t]
   );
 
