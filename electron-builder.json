@@ -1,5 +1,6 @@
 {
   "appId": "com.tofuwhisper.app",
+  "compression": "maximum",
   "afterPack": "scripts/afterPack.js",
   "extraMetadata": {
     "windowsTrayIdentity": true

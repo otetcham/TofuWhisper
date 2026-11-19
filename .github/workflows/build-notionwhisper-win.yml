@@ -30,13 +30,8 @@ jobs:
       - name: Download Windows binaries
         run: |
           npm run download:whisper-cpp
-          npm run download:llama-server
           npm run download:sherpa-onnx
-          npm run download:yt-dlp
-          npm run download:qdrant
-          npm run download:meeting-aec-helper
           npm run download:whisper-vad-model
-          npm run download:diarization-models -- --output-dir resources/bin/diarization-models
           npm run download:nircmd
           npm run compile:winkeys
           npm run compile:winpaste
