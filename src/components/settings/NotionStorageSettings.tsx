@@ -19,6 +19,9 @@ export const NotionStorageSettings: React.FC = () => {
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isPulling, setIsPulling] = useState(false);
+  const [parentPageInput, setParentPageInput] = useState("");
+  const [isCreatingDb, setIsCreatingDb] = useState(false);
 
   const api = (window as unknown as { electronAPI?: Record<string, (...args: unknown[]) => Promise<unknown>> }).electronAPI;
 
@@ -87,6 +90,49 @@ export const NotionStorageSettings: React.FC = () => {
       }
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  const handlePullAll = async () => {
+    if (!api?.pullAllNotesFromNotion) return;
+    setIsPulling(true);
+    setStatusMsg(null);
+    try {
+      const res = (await api.pullAllNotesFromNotion()) as {
+        ok: boolean;
+        total?: number;
+        imported?: number;
+        error?: string;
+      };
+      if (res.ok) {
+        setStatusMsg(`Notionから取得完了: ${res.imported} 件を新規インポート (全 ${res.total} 件中)`);
+      } else {
+        setStatusMsg(`取得エラー: ${res.error}`);
+      }
+    } finally {
+      setIsPulling(false);
+    }
+  };
+
+  const handleCreateDb = async () => {
+    if (!api?.createNotionDatabase) return;
+    setIsCreatingDb(true);
+    setStatusMsg(null);
+    try {
+      const res = (await api.createNotionDatabase({
+        apiKey: apiKeyInput || undefined,
+        parentPageId: parentPageInput,
+      })) as { ok: boolean; databaseId?: string; databaseTitle?: string; error?: string };
+      if (res.ok && res.databaseId) {
+        setDatabaseIdInput(res.databaseId);
+        setEnabled(true);
+        setStatusMsg(`Notionデータベース「${res.databaseTitle}」を作成・接続しました。`);
+        await loadConfig();
+      } else {
+        setStatusMsg(`作成エラー: ${res.error}`);
+      }
+    } finally {
+      setIsCreatingDb(false);
     }
   };
 
@@ -169,6 +215,37 @@ export const NotionStorageSettings: React.FC = () => {
         >
           {isSyncing ? "同期中..." : "既存ノートをすべてNotionへ同期"}
         </button>
+        <button
+          type="button"
+          onClick={handlePullAll}
+          disabled={isPulling || !config?.enabled}
+          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+        >
+          {isPulling ? "取得中..." : "Notionからノートを取得"}
+        </button>
+      </div>
+
+      <div className="pt-2 border-t border-border space-y-2">
+        <label className="text-xs font-medium text-muted-foreground">
+          まだDBがない場合：親ページのURL/IDを指定して TofuWhisper 用DBを自動作成
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={parentPageInput}
+            onChange={(e) => setParentPageInput(e.target.value)}
+            placeholder="Notionの親ページURLまたはID"
+            className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs"
+          />
+          <button
+            type="button"
+            onClick={handleCreateDb}
+            disabled={isCreatingDb || !parentPageInput.trim()}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
+          >
+            {isCreatingDb ? "作成中..." : "DBを自動作成"}
+          </button>
+        </div>
       </div>
 
       {statusMsg && <p className="text-xs text-muted-foreground">{statusMsg}</p>}

@@ -1,4 +1,6 @@
-const { net } = require("electron");
+const fs = require("fs");
+const path = require("path");
+const { app, net, safeStorage } = require("electron");
 const { runOAuthLoopbackFlow, OAuthFlowError } = require("./oauthLoopbackFlow");
 
 const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -11,15 +13,82 @@ class GoogleCalendarOAuth {
     this.databaseManager = databaseManager;
   }
 
+  _getConfigPath() {
+    return path.join(app.getPath("userData"), "google-oauth.json");
+  }
+
+  _readSavedCredentials() {
+    try {
+      const raw = JSON.parse(fs.readFileSync(this._getConfigPath(), "utf8"));
+      const decrypt = (v) => {
+        if (!v) return "";
+        if (typeof v === "string") return v;
+        if (v.encrypted && safeStorage.isEncryptionAvailable()) {
+          return safeStorage.decryptString(Buffer.from(v.data, "base64"));
+        }
+        return v.data || "";
+      };
+      return {
+        clientId: decrypt(raw.clientId).trim(),
+        clientSecret: decrypt(raw.clientSecret).trim(),
+      };
+    } catch {
+      return { clientId: "", clientSecret: "" };
+    }
+  }
+
+  getOAuthConfig() {
+    const saved = this._readSavedCredentials();
+    const clientId = saved.clientId || process.env.GOOGLE_CALENDAR_CLIENT_ID || "";
+    const clientSecret = saved.clientSecret || process.env.GOOGLE_CALENDAR_CLIENT_SECRET || "";
+    return {
+      clientId,
+      hasClientSecret: Boolean(clientSecret),
+    };
+  }
+
+  saveOAuthConfig({ clientId, clientSecret }) {
+    const current = this._readSavedCredentials();
+    const encrypt = (plain) => {
+      if (!plain) return "";
+      try {
+        if (safeStorage.isEncryptionAvailable()) {
+          return { encrypted: true, data: safeStorage.encryptString(plain).toString("base64") };
+        }
+      } catch {}
+      return { encrypted: false, data: plain };
+    };
+    const nextId = clientId !== undefined ? String(clientId).trim() : current.clientId;
+    const nextSecret =
+      clientSecret !== undefined && clientSecret !== ""
+        ? String(clientSecret).trim()
+        : current.clientSecret;
+    fs.mkdirSync(path.dirname(this._getConfigPath()), { recursive: true });
+    fs.writeFileSync(
+      this._getConfigPath(),
+      JSON.stringify({ clientId: encrypt(nextId), clientSecret: encrypt(nextSecret) }, null, 2),
+      "utf8"
+    );
+    return this.getOAuthConfig();
+  }
+
   getClientId() {
-    return process.env.GOOGLE_CALENDAR_CLIENT_ID;
+    return this._readSavedCredentials().clientId || process.env.GOOGLE_CALENDAR_CLIENT_ID;
   }
 
   getClientSecret() {
-    return process.env.GOOGLE_CALENDAR_CLIENT_SECRET;
+    return this._readSavedCredentials().clientSecret || process.env.GOOGLE_CALENDAR_CLIENT_SECRET;
   }
 
   startOAuthFlow({ signal } = {}) {
+    if (!this.getClientId() || !this.getClientSecret()) {
+      return Promise.reject(
+        new OAuthFlowError(
+          "missing_client_credentials",
+          "Google OAuth Client ID / Client Secret が未設定です。カレンダー設定の「Google OAuth 設定」から入力してください。"
+        )
+      );
+    }
     return runOAuthLoopbackFlow({
       signal,
       errorParam: "gcal_error",

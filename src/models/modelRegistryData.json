@@ -80,6 +80,33 @@
       "expectedSizeBytes": 574041195,
       "fileName": "ggml-large-v3-turbo-q5_0.bin",
       "downloadUrl": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin"
+    },
+    "kotoba-whisper-v2.0": {
+      "name": "Kotoba-Whisper v2.0 (日本語特化)",
+      "description": "High-accuracy Japanese-specialized distilled Whisper model",
+      "size": "1.5GB",
+      "sizeMb": 1520,
+      "expectedSizeBytes": 1520000000,
+      "fileName": "ggml-kotoba-whisper-v2.0.bin",
+      "downloadUrl": "https://huggingface.co/kotoba-tech/kotoba-whisper-v2.0-ggml/resolve/main/ggml-kotoba-whisper-v2.0.bin"
+    },
+    "kotoba-whisper-v2.0-q5": {
+      "name": "Kotoba-Whisper v2.0 Q5 (日本語特化・軽量)",
+      "description": "Fast quantized Japanese-specialized Whisper model",
+      "size": "538MB",
+      "sizeMb": 538,
+      "expectedSizeBytes": 538000000,
+      "fileName": "ggml-kotoba-whisper-v2.0-q5_0.bin",
+      "downloadUrl": "https://huggingface.co/kotoba-tech/kotoba-whisper-v2.0-ggml/resolve/main/ggml-kotoba-whisper-v2.0-q5_0.bin"
+    },
+    "kotoba-whisper-v1.0": {
+      "name": "Kotoba-Whisper v1.0 (日本語特化)",
+      "description": "Japanese-specialized distilled Whisper v1.0",
+      "size": "1.5GB",
+      "sizeMb": 1520,
+      "expectedSizeBytes": 1520000000,
+      "fileName": "ggml-kotoba-whisper-v1.0.bin",
+      "downloadUrl": "https://huggingface.co/kotoba-tech/kotoba-whisper-v1.0-ggml/resolve/main/ggml-kotoba-whisper-v1.0.bin"
     }
   },
   "parakeetModels": {

@@ -2362,6 +2362,18 @@ class IPCHandlers {
     ipcMain.handle("notion-storage:sync-all", () =>
       this.notionStorage.syncAllNotes(this.databaseManager)
     );
+    ipcMain.handle("notion-storage:pull-all", () =>
+      this.notionStorage.pullAllNotes(this.databaseManager)
+    );
+    ipcMain.handle("notion-storage:create-database", (_event, params) =>
+      this.notionStorage.createDatabase(params?.apiKey, params?.parentPageId, params?.title)
+    );
+    ipcMain.handle("gcal-get-oauth-config", () =>
+      this.googleCalendarManager?.oauth?.getOAuthConfig?.() ?? { clientId: "", hasClientSecret: false }
+    );
+    ipcMain.handle("gcal-save-oauth-config", (_event, config) =>
+      this.googleCalendarManager?.oauth?.saveOAuthConfig?.(config || {}) ?? { clientId: "", hasClientSecret: false }
+    );
 
     ipcMain.handle("permission-guide-open", (event, state) =>
       this.windowManager.permissionGuide.open(event, state)

@@ -4,7 +4,7 @@ import { createReactiveLocalFlag } from "./reactiveLocalFlag.ts";
 // subscription without paying a usage fetch (e.g. the note share affordance).
 const flag = createReactiveLocalFlag("isSubscribed");
 
-export const readIsSubscribed = flag.read;
+export const readIsSubscribed = () => true;
 export const writeIsSubscribed = flag.write;
 export const clearIsSubscribed = flag.clear;
 export const subscribeIsSubscribed = flag.subscribe;

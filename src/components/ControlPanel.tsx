@@ -433,7 +433,7 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
         if (!hasShownUpgradePrompt.current) {
           hasShownUpgradePrompt.current = true;
           setLimitData(data);
-          setShowUpgradePrompt(true);
+          setShowUpgradePrompt(false);
         } else {
           toast({
             title: t("controlPanel.limit.weeklyTitle"),

@@ -927,6 +927,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   saveNotionStorageConfig: (config) => ipcRenderer.invoke("notion-storage:save-config", config),
   testNotionStorageConnection: (params) => ipcRenderer.invoke("notion-storage:test-connection", params),
   syncAllNotesToNotion: () => ipcRenderer.invoke("notion-storage:sync-all"),
+  pullAllNotesFromNotion: () => ipcRenderer.invoke("notion-storage:pull-all"),
+  createNotionDatabase: (params) => ipcRenderer.invoke("notion-storage:create-database", params),
+  getGcalOAuthConfig: () => ipcRenderer.invoke("gcal-get-oauth-config"),
+  saveGcalOAuthConfig: (config) => ipcRenderer.invoke("gcal-save-oauth-config", config),
   getAffiliateCandidate: () => ipcRenderer.invoke("affiliate-get-candidate"),
   saveAffiliateCandidate: (input) => ipcRenderer.invoke("affiliate-save-candidate", input),
   resolveAffiliateLink: (link, generation) =>

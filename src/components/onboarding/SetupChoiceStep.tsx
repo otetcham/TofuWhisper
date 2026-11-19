@@ -1,4 +1,5 @@
 import { useRegistryVersion } from "../../hooks/useRegistryVersion";
+import { NotionStorageSettings } from "../settings/NotionStorageSettings";
 import { useEffect, useState } from "react";
 import {
   AlertCircle,
@@ -144,6 +145,7 @@ export default function SetupChoiceStep({
     };
   }, []);
   const [showMore, setShowMore] = useState(false);
+  const [showNotionDialog, setShowNotionDialog] = useState(false);
 
   const availability = getOnboardingSetupAvailability({
     policy,
@@ -156,11 +158,11 @@ export default function SetupChoiceStep({
     ].map((id) => ({ id })),
   });
   const {
-    cloud: cloudAllowed,
     local: localAllowed,
     byok: byokAllowed,
     selfHosted: selfHostedAllowed,
   } = availability;
+  const cloudAllowed = false;
   const moreOptionsAllowed = byokAllowed || selfHostedAllowed;
 
   const chooseCloud = () => {
@@ -285,6 +287,40 @@ export default function SetupChoiceStep({
           </SetupCard>
         )}
 
+        <SetupCard>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <span className="flex size-9 items-center justify-center rounded-full bg-[var(--onboarding-inverse-surface)] text-sm font-bold text-[var(--onboarding-surface)]">
+                N
+              </span>
+              <span className="rounded-[47px] bg-[var(--onboarding-accent)] px-[9px] py-1 text-[10px] leading-[1.4] text-[var(--onboarding-accent-foreground)]">
+                TofuWhisper
+              </span>
+            </div>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <h2 className="onboarding-card-title text-[var(--onboarding-text-primary)]">
+                  Notion アカウント連携
+                </h2>
+                <p className="text-sm leading-[1.4] text-[var(--onboarding-text-secondary)]">
+                  個人の Notion データベースを接続して、ノートや文字起こしを保存・取得します。
+                </p>
+              </div>
+              <ul className="flex flex-col gap-2">
+                <Feature icon={ShieldCheck} accent>
+                  OpenWhispr Cloud 不使用
+                </Feature>
+                <Feature icon={Zap} accent>
+                  既存DB接続・新規DB自動作成に対応
+                </Feature>
+              </ul>
+            </div>
+          </div>
+          <CardAction brand onClick={() => setShowNotionDialog(true)}>
+            Notion を接続する
+          </CardAction>
+        </SetupCard>
+
         {cloudAllowed && (
           <SetupCard>
             {/* "Vector 1": a 343x183 wash pinned to the bottom of the cloud card.
@@ -345,6 +381,16 @@ export default function SetupChoiceStep({
       {/* Frame 25: BYOK and self-hosted are not cards in the spec — they live
           behind this pill, which opens the "Choose your API setup" modal. Hidden
           entirely when policy disallows both options. */}
+      <Dialog open={showNotionDialog} onOpenChange={setShowNotionDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogTitle>Notion データベース連携 (TofuWhisper)</DialogTitle>
+          <DialogDescription>
+            Notion Integration Token とデータベース（または親ページ）を設定してください。
+          </DialogDescription>
+          <NotionStorageSettings />
+        </DialogContent>
+      </Dialog>
+
       {moreOptionsAllowed && (
         <button
           type="button"

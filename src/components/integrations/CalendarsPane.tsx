@@ -57,6 +57,62 @@ function ProviderRow({ icon, i18nKey, connected, isConnecting, onConnect }: Prov
   );
 }
 
+function GoogleOAuthConfigRow() {
+  const [clientId, setClientId] = useState("");
+  const [clientSecret, setClientSecret] = useState("");
+  const [hasSecret, setHasSecret] = useState(false);
+  const [savedMsg, setSavedMsg] = useState<string | null>(null);
+  const api = window.electronAPI as unknown as Record<string, (...args: unknown[]) => Promise<unknown>> | undefined;
+
+  useEffect(() => {
+    api?.getGcalOAuthConfig?.().then((res) => {
+      const cfg = res as { clientId?: string; hasClientSecret?: boolean } | undefined;
+      if (cfg?.clientId) setClientId(cfg.clientId);
+      setHasSecret(Boolean(cfg?.hasClientSecret));
+    });
+  }, []);
+
+  const handleSave = async () => {
+    const res = (await api?.saveGcalOAuthConfig?.({ clientId, clientSecret })) as
+      | { clientId?: string; hasClientSecret?: boolean }
+      | undefined;
+    setHasSecret(Boolean(res?.hasClientSecret));
+    setClientSecret("");
+    setSavedMsg("Google OAuth 設定を保存しました。");
+  };
+
+  return (
+    <SettingsPanelRow>
+      <div className="ps-12 space-y-2">
+        <p className="text-xs font-medium text-foreground">Google OAuth 設定 (Client ID / Secret)</p>
+        <p className="text-[11px] text-muted-foreground">
+          独自のビルドで Google カレンダーを連携するには、Google Cloud のデスクトップアプリ用 OAuth クライアントを設定してください。
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={clientId}
+            onChange={(e) => setClientId(e.target.value)}
+            placeholder="Client ID (...apps.googleusercontent.com)"
+            className="flex-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs"
+          />
+          <input
+            type="password"
+            value={clientSecret}
+            onChange={(e) => setClientSecret(e.target.value)}
+            placeholder={hasSecret ? "Client Secret (設定済み)" : "Client Secret"}
+            className="flex-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs"
+          />
+          <Button size="sm" variant="outline" onClick={handleSave} className="shrink-0">
+            保存
+          </Button>
+        </div>
+        {savedMsg && <p className="text-[11px] text-muted-foreground">{savedMsg}</p>}
+      </div>
+    </SettingsPanelRow>
+  );
+}
+
 interface CalendarAccountRowsProps {
   i18nKey: string;
   accounts: CalendarAccount[];
@@ -329,6 +385,7 @@ export function CalendarsPane({ title }: CalendarsPaneProps): ReactElement {
           isConnecting={isConnecting}
           onAddAnother={handleConnect}
         />
+        <GoogleOAuthConfigRow />
 
         <ProviderRow
           icon={microsoftCalendarIcon}

@@ -346,6 +346,76 @@ class NotionStorageManager {
       return { ok: false, error: err.message || String(err) };
     }
   }
+
+  async createDatabase(apiKeyOverride, parentPageIdOrUrl, title = "TofuWhisper Notes") {
+    const cfg = this.getConfig();
+    const apiKey = (apiKeyOverride || cfg.apiKey || "").trim();
+    const parentId = extractDatabaseId(parentPageIdOrUrl || "");
+    if (!apiKey || !parentId) {
+      return { ok: false, error: "API Key と親ページ ID/URL を入力してください。" };
+    }
+    try {
+      const created = await this._notionFetch("/databases", apiKey, {
+        method: "POST",
+        body: JSON.stringify({
+          parent: { type: "page_id", page_id: parentId },
+          title: [{ type: "text", text: { content: title } }],
+          properties: {
+            Name: { title: {} },
+            Type: { select: { options: [{ name: "personal" }, { name: "meeting" }, { name: "upload" }] } },
+            UpdatedAt: { date: {} },
+          },
+        }),
+      });
+      this.saveConfig({ enabled: true, apiKey, databaseId: created.id });
+      return { ok: true, databaseId: created.id, databaseTitle: title };
+    } catch (err) {
+      return { ok: false, error: err.message || String(err) };
+    }
+  }
+
+  async pullAllNotes(databaseManager) {
+    const cfg = this.getConfig();
+    if (!cfg.enabled || !cfg.apiKey || !cfg.databaseId) {
+      return { ok: false, error: "Notion Storage が有効になっていないか、設定が不足しています。" };
+    }
+    try {
+      const query = await this._notionFetch(`/databases/${cfg.databaseId}/query`, cfg.apiKey, {
+        method: "POST",
+        body: JSON.stringify({ page_size: 50 }),
+      });
+      const map = this._readMap();
+      const reverseMap = new Map(
+        Object.entries(map).map(([noteId, entry]) => [entry.notionPageId, noteId])
+      );
+      let imported = 0;
+      for (const page of query.results || []) {
+        const titleProp = Object.values(page.properties || {}).find((p) => p?.type === "title");
+        const title = (titleProp?.title || []).map((t) => t.plain_text).join("") || "Untitled";
+        const children = await this._notionFetch(`/blocks/${page.id}/children?page_size=100`, cfg.apiKey);
+        const lines = [];
+        for (const blk of children.results || []) {
+          const rt = blk[blk.type]?.rich_text;
+          if (Array.isArray(rt)) {
+            lines.push(rt.map((t) => t.plain_text).join(""));
+          }
+        }
+        const content = lines.join("\n").trim();
+        const existingId = reverseMap.get(page.id);
+        if (!existingId && databaseManager?.saveNote) {
+          const saved = databaseManager.saveNote(title, content, "personal", null, null, null, null);
+          if (saved?.note?.id) {
+            map[saved.note.id] = { notionPageId: page.id, lastSyncedAt: new Date().toISOString() };
+            imported += 1;
+          }
+        }
+      }
+      this._writeMap(map);
+      return { ok: true, total: (query.results || []).length, imported };
+    } catch (err) {
+      return { ok: false, error: err.message || String(err) };
+    }
+  }
 }
 
 module.exports = { NotionStorageManager, extractDatabaseId };
