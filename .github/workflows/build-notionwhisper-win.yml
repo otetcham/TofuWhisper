@@ -38,8 +38,8 @@ jobs:
           npm run download:whisper-vad-model
           npm run download:diarization-models -- --output-dir resources/bin/diarization-models
           npm run download:nircmd
-          npm run download:windows-fast-paste
-          npm run download:windows-key-listener || npm run compile:winkeys
+          npm run compile:winkeys
+          npm run compile:winpaste
           npm run download:windows-mic-listener
           npm run download:windows-system-audio-helper
           npm run download:brand-fonts
