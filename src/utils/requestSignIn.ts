@@ -12,8 +12,5 @@ export const SIGN_IN_PROMPTED_AT_KEY = "signInPromptedAt";
  * Its "Continue without an account" writes the flag back.
  */
 export function requestSignIn(): void {
-  localStorage.setItem(SIGN_IN_PROMPTED_AT_KEY, String(Date.now()));
-  localStorage.removeItem("authenticationSkipped");
-  localStorage.removeItem("skipAuth");
-  window.location.reload();
+  // Account login is disabled in TofuWhisper.
 }

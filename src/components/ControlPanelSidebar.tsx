@@ -51,8 +51,8 @@ export default function ControlPanelSidebar({
     () => localStorage.getItem("upgradeProDismissed") === "true"
   );
 
-  const showLimitBanner = upsell === "show" && Boolean(isSignedIn) && Boolean(isOverLimit);
-  const showUpgradeBanner = upsell === "show" && !showLimitBanner && !upgradeDismissed;
+  const showLimitBanner = false;
+  const showUpgradeBanner = false;
 
   const navItems = useControlPanelNavItems();
 

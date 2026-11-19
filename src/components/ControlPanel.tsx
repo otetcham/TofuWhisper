@@ -255,7 +255,7 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
     setSettingsSection("transcription");
     setShowSettings(true);
   }, []);
-  useSignInCloudNudge(isSignedIn, openTranscriptionSettings);
+  // Cloud sign-in nudge disabled in TofuWhisper
   const workspacesLoaded = useWorkspaceStore((state) => state.loaded);
   const activeWorkspaceId = useWorkspaceStore((state) => state.activeWorkspaceId);
   const [audioTestLink, setAudioTestLink] = useState<EnterpriseAudioTestLink | null>(null);
@@ -1149,13 +1149,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
         onOk={() => {}}
       />
 
-      <UpgradePrompt
-        open={showUpgradePrompt}
-        onOpenChange={setShowUpgradePrompt}
-        wordsUsed={limitData?.wordsUsed}
-        limit={limitData?.limit}
-      />
-
       <PostMigrationOnboarding
         open={showPostMigration}
         onOpenChange={setShowPostMigration}
@@ -1455,7 +1448,7 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
                 <Suspense fallback={null}>
                   <InsightsView
                     onSignIn={() => {
-                      setSettingsSection("account");
+                      setSettingsSection("general");
                       setShowSettings(true);
                     }}
                   />

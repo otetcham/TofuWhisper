@@ -13,33 +13,33 @@
   /* OpenWhispr Theme — registers color tokens with Tailwind v4.
      These are the light-mode defaults; .dark overrides them below. */
   /* Midpoint of the brand glass gradient (#5588F0 → #3466E2) so tints, rings and links match it. */
-  --color-primary: #4577e9;
+  --color-primary: #171717;
   --color-primary-foreground: #ffffff;
   --color-secondary: #f5f5f5;
   --color-secondary-foreground: #171717;
   --color-muted: #f5f5f5;
   --color-muted-foreground: #525252;
-  --color-accent: oklch(0.55 0.22 285);
+  --color-accent: #262626;
   --color-accent-foreground: #ffffff;
-  /* Agent Mode identity, sourced from the supplied sparkle/leaf mark. */
-  --color-agent-brand: #8787ff;
+  /* Agent Mode identity, monochrome in TofuWhisper. */
+  --color-agent-brand: #404040;
   --color-destructive: #dc2626;
   --color-destructive-foreground: #ffffff;
   --color-border: #e5e5e5;
   --color-input: #f9f6f1;
-  --color-ring: #4577e9;
+  --color-ring: #171717;
   --color-background: #ffffff;
   --color-foreground: #171717;
   --color-card: #ffffff;
   --color-card-foreground: #171717;
   --color-popover: #ffffff;
   --color-popover-foreground: #171717;
-  --color-link: #4577e9;
+  --color-link: #171717;
   --color-success: #16a34a;
   --color-success-foreground: #ffffff;
   --color-warning: #d97706;
   --color-warning-foreground: #ffffff;
-  --color-info: #4577e9;
+  --color-info: #404040;
   --color-info-foreground: #ffffff;
 
   /* Surface hierarchy — light mode equivalents */
@@ -54,7 +54,7 @@
   /* Border states — light mode equivalents */
   --color-border-subtle: #e5e5e5;
   --color-border-hover: #d4d4d4;
-  --color-border-active: #4577e9;
+  --color-border-active: #171717;
 }
 
 :root {
@@ -119,9 +119,8 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.16),
     inset 0 -1px 1px rgba(0, 0, 0, 0.12);
   /* The fill under that rim: Button default, mic/send circles, the onboarding brand tile. */
-  --gradient-brand-glass: linear-gradient(180deg, #5588f0 0%, #3466e2 100%);
-  /* Today's upcoming-events card: a brand-blue band lit at both ends, crossed by two soft
-     diagonal highlights, as in the Home design. */
+  --gradient-brand-glass: linear-gradient(180deg, #27272a 0%, #111111 100%);
+  /* Today's upcoming-events card: monochrome charcoal band with subtle diagonal highlights. */
   --gradient-calendar-today:
     linear-gradient(
       115deg,
@@ -132,9 +131,9 @@
       rgb(255 255 255 / 0.08) 64%,
       transparent 72%
     ),
-    linear-gradient(90deg, #58a7fe 0%, #1a7bff 22%, #1f80ff 55%, #2a88ff 72%, #62afff 100%);
-  /* The brand tile floats over the onboarding hero, so it adds a soft coloured lift. */
-  --shadow-brand-tile: var(--shadow-brand-glass), 0 10px 24px -8px rgb(52 102 226 / 0.45);
+    linear-gradient(90deg, #27272a 0%, #18181b 50%, #27272a 100%);
+  /* The brand tile floats over the onboarding hero. */
+  --shadow-brand-tile: var(--shadow-brand-glass), 0 10px 24px -8px rgb(0 0 0 / 0.35);
 }
 
 .dark {
@@ -147,25 +146,25 @@
   --color-card-foreground: oklch(0.93 0 0);
   --color-popover: oklch(0.29 0.009 260);
   --color-popover-foreground: oklch(0.93 0 0);
-  --color-primary: oklch(0.65 0.2 260);
-  --color-primary-foreground: oklch(0.99 0 0);
+  --color-primary: oklch(0.95 0 0);
+  --color-primary-foreground: oklch(0.12 0 0);
   --color-secondary: oklch(0.28 0.007 260);
   --color-secondary-foreground: oklch(0.9 0 0);
   --color-muted: oklch(0.24 0.006 260);
   --color-muted-foreground: oklch(0.65 0 0);
-  --color-accent: oklch(0.68 0.18 285);
-  --color-accent-foreground: oklch(0.99 0 0);
+  --color-accent: oklch(0.88 0 0);
+  --color-accent-foreground: oklch(0.12 0 0);
   --color-destructive: oklch(0.62 0.22 25);
   --color-destructive-foreground: oklch(0.99 0 0);
   --color-border: oklch(0.35 0.007 260);
   --color-input: oklch(0.19 0.005 260);
-  --color-ring: oklch(0.65 0.2 260);
+  --color-ring: oklch(0.8 0 0);
   --color-success: oklch(0.7 0.18 145);
   --color-success-foreground: oklch(0.99 0 0);
   --color-warning: oklch(0.75 0.15 70);
   --color-warning-foreground: oklch(0.15 0 0);
-  --color-info: oklch(0.68 0.18 240);
-  --color-info-foreground: oklch(0.99 0 0);
+  --color-info: oklch(0.82 0 0);
+  --color-info-foreground: oklch(0.12 0 0);
 
   /* Surface hierarchy — charcoal depth system (0.22 → 0.33) */
   --color-surface-0: oklch(0.22 0.006 260);
@@ -392,7 +391,7 @@ body.dark:has(.onboarding-canvas) {
   /* White, same as light: a filled brand CTA reads as the brand in both themes,
      and flipping its label to near-black made the dark-mode buttons look like a
      different component. */
-  --onboarding-accent-foreground: #ffffff;
+  --onboarding-accent-foreground: #171717;
   --onboarding-accent-hover: color-mix(in srgb, var(--onboarding-accent) 88%, white);
   --onboarding-text-primary: #f5f5f5;
   --onboarding-text-secondary: #a1a1a1;
