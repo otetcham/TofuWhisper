@@ -24,8 +24,8 @@ export function useConnectorAccess(): ConnectorAccess {
   const usage = useSyncExternalStore(subscribeUsage, getUsageState);
   const isSubscribedFlag = useSyncExternalStore(subscribeIsSubscribed, readIsSubscribed);
   return {
-    isPaid: isSignedIn && hasConnectorPlan(usage, isSubscribedFlag),
+    isPaid: true,
     blockedByOrg,
-    connectorsAllowed,
+    connectorsAllowed: !blockedByOrg && connectorsAllowed,
   };
 }

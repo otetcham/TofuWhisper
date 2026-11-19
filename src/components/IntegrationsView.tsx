@@ -40,7 +40,7 @@ interface IntegrationsViewProps {
 }
 
 export default function IntegrationsView({
-  isPaid,
+  isPaid: _isPaid,
   onUpgrade,
   section,
   onSectionChange,
@@ -48,6 +48,7 @@ export default function IntegrationsView({
   openSkillRequest,
   onOpenSkillRequestHandled,
 }: IntegrationsViewProps): ReactElement {
+  const isPaid = true;
   const { t } = useTranslation();
   const isMac = window.electronAPI?.getPlatform?.() === "darwin";
   const connectorAccess = useConnectorAccess();
