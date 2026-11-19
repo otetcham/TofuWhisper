@@ -1,4 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Toggle } from "../ui/toggle";
+import { Badge } from "../ui/badge";
+import { SettingsPanel, SettingsPanelRow, SettingsRow } from "../ui/SettingsSection";
 
 interface NotionConfig {
   enabled: boolean;
@@ -137,124 +142,133 @@ export const NotionStorageSettings: React.FC = () => {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card p-4 space-y-4">
-      <div>
-        <h3 className="text-sm font-semibold">Notion Storage (TofuWhisper)</h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          OpenWhispr Cloud を使わず、個人の Notion データベースへノートを直接保存・同期します。
-        </p>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">Notion 保存を有効にする</label>
-        <input
-          type="checkbox"
-          checked={enabled}
-          onChange={(e) => setEnabled(e.target.checked)}
-          className="h-4 w-4"
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <label className="text-sm font-medium">ノート作成・更新時に自動同期する</label>
-        <input
-          type="checkbox"
-          checked={autoSync}
-          onChange={(e) => setAutoSync(e.target.checked)}
-          className="h-4 w-4"
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">
-          Notion Integration Token {config?.hasApiKey ? `(設定済み: ${config.apiKeyMasked})` : ""}
-        </label>
-        <input
-          type="password"
-          value={apiKeyInput}
-          onChange={(e) => setApiKeyInput(e.target.value)}
-          placeholder={config?.hasApiKey ? "変更する場合のみ入力" : "ntn_... または secret_..."}
-          className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm"
-        />
-      </div>
-
-      <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">
-          Notion Database ID または URL
-        </label>
-        <input
-          type="text"
-          value={databaseIdInput}
-          onChange={(e) => setDatabaseIdInput(e.target.value)}
-          placeholder="https://www.notion.so/... または 32文字のID"
-          className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm"
-        />
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={handleSave}
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
-        >
-          設定を保存
-        </button>
-        <button
-          type="button"
-          onClick={handleTest}
-          disabled={isTesting}
-          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
-        >
-          {isTesting ? "テスト中..." : "接続テスト"}
-        </button>
-        <button
-          type="button"
-          onClick={handleSyncAll}
-          disabled={isSyncing || !config?.enabled}
-          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
-        >
-          {isSyncing ? "同期中..." : "既存ノートをすべてNotionへ同期"}
-        </button>
-        <button
-          type="button"
-          onClick={handlePullAll}
-          disabled={isPulling || !config?.enabled}
-          className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
-        >
-          {isPulling ? "取得中..." : "Notionからノートを取得"}
-        </button>
-      </div>
-
-      <div className="pt-2 border-t border-border space-y-2">
-        <label className="text-xs font-medium text-muted-foreground">
-          まだDBがない場合：親ページのURL/IDを指定して TofuWhisper 用DBを自動作成
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={parentPageInput}
-            onChange={(e) => setParentPageInput(e.target.value)}
-            placeholder="Notionの親ページURLまたはID"
-            className="flex-1 rounded-md border border-border bg-background px-3 py-1.5 text-xs"
-          />
-          <button
-            type="button"
-            onClick={handleCreateDb}
-            disabled={isCreatingDb || !parentPageInput.trim()}
-            className="rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent disabled:opacity-50"
-          >
-            {isCreatingDb ? "作成中..." : "DBを自動作成"}
-          </button>
+    <SettingsPanel>
+      <SettingsPanelRow>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-foreground">Notion Storage (TofuWhisper)</p>
+              {config?.enabled && config?.hasApiKey && config?.databaseId && (
+                <Badge variant="success">接続済み</Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground/70 mt-0.5 leading-relaxed">
+              OpenWhispr Cloud を使わず、個人の Notion データベースへノートを保存・取得します。
+            </p>
+          </div>
         </div>
-      </div>
+      </SettingsPanelRow>
 
-      {statusMsg && <p className="text-xs text-muted-foreground">{statusMsg}</p>}
-      {config?.lastError && <p className="text-xs text-red-500">前回のエラー: {config.lastError}</p>}
-      {config?.lastSyncedAt && (
-        <p className="text-xs text-muted-foreground">
-          最終同期: {new Date(config.lastSyncedAt).toLocaleString()}
-        </p>
+      <SettingsPanelRow>
+        <SettingsRow
+          label="Notion 保存を有効にする"
+          description="ノート・文字起こしデータの保存先として Notion を使用します"
+        >
+          <Toggle checked={enabled} onChange={setEnabled} />
+        </SettingsRow>
+      </SettingsPanelRow>
+
+      <SettingsPanelRow>
+        <SettingsRow
+          label="自動同期"
+          description="ノートの作成・更新時に自動で Notion へ反映します"
+        >
+          <Toggle checked={autoSync} onChange={setAutoSync} />
+        </SettingsRow>
+      </SettingsPanelRow>
+
+      <SettingsPanelRow>
+        <div className="space-y-2.5">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-foreground">
+              Notion Integration Token {config?.hasApiKey ? `(設定済み: ${config.apiKeyMasked})` : ""}
+            </label>
+            <Input
+              type="password"
+              value={apiKeyInput}
+              onChange={(e) => setApiKeyInput(e.target.value)}
+              placeholder={config?.hasApiKey ? "変更する場合のみ入力" : "ntn_... または secret_..."}
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-foreground">
+              Notion Database ID または URL
+            </label>
+            <Input
+              type="text"
+              value={databaseIdInput}
+              onChange={(e) => setDatabaseIdInput(e.target.value)}
+              placeholder="https://www.notion.so/... または 32文字のID"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button size="sm" onClick={handleSave}>
+              設定を保存
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleTest} disabled={isTesting}>
+              {isTesting ? "テスト中..." : "接続テスト"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleSyncAll}
+              disabled={isSyncing || !config?.enabled}
+            >
+              {isSyncing ? "同期中..." : "すべてNotionへ同期"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handlePullAll}
+              disabled={isPulling || !config?.enabled}
+            >
+              {isPulling ? "取得中..." : "Notionから取得"}
+            </Button>
+          </div>
+        </div>
+      </SettingsPanelRow>
+
+      <SettingsPanelRow>
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-foreground">
+            DBがない場合：親ページURL/IDを指定して TofuWhisper 用DBを自動作成
+          </label>
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              value={parentPageInput}
+              onChange={(e) => setParentPageInput(e.target.value)}
+              placeholder="Notionの親ページURLまたはID"
+              className="flex-1"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleCreateDb}
+              disabled={isCreatingDb || !parentPageInput.trim()}
+              className="shrink-0"
+            >
+              {isCreatingDb ? "作成中..." : "DBを自動作成"}
+            </Button>
+          </div>
+        </div>
+      </SettingsPanelRow>
+
+      {(statusMsg || config?.lastError || config?.lastSyncedAt) && (
+        <SettingsPanelRow>
+          <div className="space-y-1">
+            {statusMsg && <p className="text-xs text-muted-foreground">{statusMsg}</p>}
+            {config?.lastError && <p className="text-xs text-destructive">前回のエラー: {config.lastError}</p>}
+            {config?.lastSyncedAt && (
+              <p className="text-xs text-muted-foreground">
+                最終同期: {new Date(config.lastSyncedAt).toLocaleString()}
+              </p>
+            )}
+          </div>
+        </SettingsPanelRow>
       )}
-    </div>
+    </SettingsPanel>
   );
 };

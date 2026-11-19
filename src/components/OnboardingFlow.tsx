@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CompactAuthenticationFlow } from "./CompactAuthenticationFlow";
+import { NotionOnboardingStep } from "./onboarding/NotionOnboardingStep";
 import UseCaseStep from "./onboarding/UseCaseStep";
 import { hasUseCaseIntent } from "./onboarding/useCases";
 import OnboardingShell, { OnboardingStepHeader } from "./onboarding/OnboardingShell";
@@ -965,27 +966,11 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       case "auth":
         return (
           <div className="min-h-full w-full">
-            <CompactAuthenticationFlow
-              resumeState={session.resume.auth}
-              onResumeStateChange={updateAuthResumeState}
-              autoContinue={!returnedToAuth}
-              onSignOut={() => void handleLogout()}
-              onContinueWithoutAccount={
-                requireSignIn
-                  ? undefined
-                  : () => {
-                      // Guests continue onto their route's permissions step — jumping
-                      // straight to setup-choice would skip the permission grants and
-                      // hotkey the guest route exists to guarantee (see flow.ts).
-                      setReturnedToAuth(false);
-                      setAuthPath("guest");
-                      goTo("permissions");
-                    }
-              }
-              onAuthComplete={() => {
+            <NotionOnboardingStep
+              onComplete={() => {
                 setReturnedToAuth(false);
-                setAuthPath("account");
-                goTo(session.setupMode === "cloud" ? "setup-choice" : "permissions");
+                setAuthPath("guest");
+                goTo("setup-choice");
               }}
             />
           </div>

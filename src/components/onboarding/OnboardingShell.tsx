@@ -12,6 +12,7 @@ import { DitheredHero } from "./DitheredHero";
 // under the packaged app's file:// origin. See .onboarding-canvas.
 import onboardingBackgroundLight from "@/assets/onboarding-bg-light.svg";
 import onboardingBackgroundDark from "@/assets/onboarding-bg-dark.svg";
+import tofuIcon from "@/assets/icon.png";
 
 interface OnboardingShellProps {
   compact?: boolean;
@@ -408,17 +409,11 @@ export function CompactOnboardingFrame({
 
 export function BrandMark({ className = "" }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 1024 1024"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <circle cx="512" cy="512" r="314" stroke="currentColor" strokeWidth="74" />
-      <path d="M512 383V641" stroke="currentColor" strokeWidth="74" strokeLinecap="round" />
-      <path d="M627 457V568" stroke="currentColor" strokeWidth="74" strokeLinecap="round" />
-      <path d="M397 457V568" stroke="currentColor" strokeWidth="74" strokeLinecap="round" />
-    </svg>
+    <img
+      src={tofuIcon}
+      alt="TofuWhisper"
+      className={cn("rounded-lg object-contain", className)}
+      draggable={false}
+    />
   );
 }
