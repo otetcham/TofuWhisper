@@ -1,5 +1,4 @@
 import { useRegistryVersion } from "../../hooks/useRegistryVersion";
-import { NotionStorageSettings } from "../settings/NotionStorageSettings";
 import { useEffect, useState } from "react";
 import {
   AlertCircle,
@@ -145,7 +144,6 @@ export default function SetupChoiceStep({
     };
   }, []);
   const [showMore, setShowMore] = useState(false);
-  const [showNotionDialog, setShowNotionDialog] = useState(false);
 
   const availability = getOnboardingSetupAvailability({
     policy,
@@ -213,8 +211,8 @@ export default function SetupChoiceStep({
     // Show More Options pill.
     <div className="mx-auto mt-5 flex w-full flex-col items-center gap-4">
       {!localAllowed && <LocalModelPolicyNotice scope="transcription" hasSupportedModel={false} />}
-      {/* Frame 60: row, gap 16. */}
-      <div className="onboarding-stagger flex items-start justify-center gap-3">
+      {/* Responsive 3-card row: Local, BYOK, Self-Hosted */}
+      <div className="onboarding-stagger flex flex-wrap items-stretch justify-center gap-3">
         {localAllowed && (
           <SetupCard>
             <div className="flex flex-col gap-4">
@@ -287,39 +285,69 @@ export default function SetupChoiceStep({
           </SetupCard>
         )}
 
-        <SetupCard>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <span className="flex size-9 items-center justify-center rounded-full bg-[var(--onboarding-inverse-surface)] text-sm font-bold text-[var(--onboarding-surface)]">
-                N
-              </span>
-              <span className="rounded-[47px] bg-[var(--onboarding-accent)] px-[9px] py-1 text-[10px] leading-[1.4] text-[var(--onboarding-accent-foreground)]">
-                TofuWhisper
-              </span>
-            </div>
+        {byokAllowed && (
+          <SetupCard>
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-1.5">
-                <h2 className="onboarding-card-title text-[var(--onboarding-text-primary)]">
-                  Notion アカウント連携
-                </h2>
-                <p className="text-sm leading-[1.4] text-[var(--onboarding-text-secondary)]">
-                  個人の Notion データベースを接続して、ノートや文字起こしを保存・取得します。
-                </p>
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-full bg-[var(--onboarding-inverse-surface)] text-[var(--onboarding-surface)]">
+                  <KeyRound className="size-4" />
+                </span>
+                <span className="rounded-[47px] bg-[var(--onboarding-surface-tertiary)] px-[9px] py-1 text-[10px] leading-[1.4] text-[var(--onboarding-text-primary)]">
+                  BYOK
+                </span>
               </div>
-              <ul className="flex flex-col gap-2">
-                <Feature icon={ShieldCheck} accent>
-                  OpenWhispr Cloud 不使用
-                </Feature>
-                <Feature icon={Zap} accent>
-                  既存DB接続・新規DB自動作成に対応
-                </Feature>
-              </ul>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <h2 className="onboarding-card-title text-[var(--onboarding-text-primary)]">
+                    {t("onboarding.rehaul.setupChoice.byok.title")}
+                  </h2>
+                  <p className="text-sm leading-[1.4] text-[var(--onboarding-text-secondary)]">
+                    {t("onboarding.rehaul.setupChoice.byok.description")}
+                  </p>
+                </div>
+                <ul className="flex flex-col gap-2">
+                  <Feature icon={Zap}>OpenAI / Groq / Gemini / Anthropic などに対応</Feature>
+                  <Feature icon={ShieldCheck}>キーは端末内に暗号化保存</Feature>
+                </ul>
+              </div>
             </div>
-          </div>
-          <CardAction brand onClick={() => setShowNotionDialog(true)}>
-            Notion を接続する
-          </CardAction>
-        </SetupCard>
+            <CardAction onClick={() => onSelect("byok", { selfHosted: false })}>
+              自前の API キーを設定
+            </CardAction>
+          </SetupCard>
+        )}
+
+        {selfHostedAllowed && (
+          <SetupCard>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <span className="flex size-9 items-center justify-center rounded-full bg-[var(--onboarding-inverse-surface)] text-[var(--onboarding-surface)]">
+                  <Server className="size-4" />
+                </span>
+                <span className="rounded-[47px] bg-[var(--onboarding-surface-tertiary)] px-[9px] py-1 text-[10px] leading-[1.4] text-[var(--onboarding-text-primary)]">
+                  Self-Hosted
+                </span>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <h2 className="onboarding-card-title text-[var(--onboarding-text-primary)]">
+                    {t("onboarding.rehaul.setupChoice.moreOptions.selfHosted.title")}
+                  </h2>
+                  <p className="text-sm leading-[1.4] text-[var(--onboarding-text-secondary)]">
+                    {t("onboarding.rehaul.setupChoice.moreOptions.selfHosted.description")}
+                  </p>
+                </div>
+                <ul className="flex flex-col gap-2">
+                  <Feature icon={Server}>OpenAI 互換の独自エンドポイントを利用</Feature>
+                  <Feature icon={ShieldCheck}>完全自社・ローカルサーバー運用が可能</Feature>
+                </ul>
+              </div>
+            </div>
+            <CardAction onClick={() => onSelect("byok", { selfHosted: true })}>
+              セルフホストを設定
+            </CardAction>
+          </SetupCard>
+        )}
 
         {cloudAllowed && (
           <SetupCard>
@@ -381,17 +409,7 @@ export default function SetupChoiceStep({
       {/* Frame 25: BYOK and self-hosted are not cards in the spec — they live
           behind this pill, which opens the "Choose your API setup" modal. Hidden
           entirely when policy disallows both options. */}
-      <Dialog open={showNotionDialog} onOpenChange={setShowNotionDialog}>
-        <DialogContent className="max-w-lg">
-          <DialogTitle>Notion データベース連携 (TofuWhisper)</DialogTitle>
-          <DialogDescription>
-            Notion Integration Token とデータベース（または親ページ）を設定してください。
-          </DialogDescription>
-          <NotionStorageSettings />
-        </DialogContent>
-      </Dialog>
-
-      {moreOptionsAllowed && (
+      {false && moreOptionsAllowed && (
         <button
           type="button"
           onClick={() => setShowMore(true)}

@@ -159,7 +159,6 @@ export function shouldInitializeMacAccessibilityFeatures(stepId: OnboardingStepI
  * counter on.
  */
 export const COMPACT_STEPS: ReadonlySet<OnboardingStepId> = new Set<OnboardingStepId>([
-  "auth",
   "permissions",
 ]);
 

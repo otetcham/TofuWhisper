@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { NotionStorageSettings } from "../settings/NotionStorageSettings";
 import { BrandMark } from "./OnboardingShell";
+import { Button } from "../ui/button";
 
 interface NotionOnboardingStepProps {
   onComplete: () => void;
@@ -41,31 +42,35 @@ export const NotionOnboardingStep: React.FC<NotionOnboardingStepProps> = ({ onCo
   }, []);
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-5 py-4 px-2">
-      <div className="flex flex-col items-center text-center gap-2">
+    <div className="my-auto mx-auto flex w-full max-w-xl flex-col gap-5 py-6 px-3 sm:px-6">
+      <div className="flex flex-col items-center text-center gap-2.5">
         <div className="flex items-center gap-3">
-          <BrandMark className="h-10 w-10" />
-          <span className="text-muted-foreground text-sm">×</span>
-          <NotionLogoSvg className="h-9 w-9" />
+          <BrandMark className="h-11 w-11 shadow-sm" />
+          <span className="text-sm font-medium text-[var(--onboarding-text-tertiary)]">×</span>
+          <NotionLogoSvg className="h-10 w-10" />
         </div>
-        <h1 className="text-xl font-bold text-[var(--onboarding-text-primary)]">
+        <h1 className="onboarding-step-title text-[var(--onboarding-text-primary)]">
           TofuWhisper へようこそ
         </h1>
-        <p className="text-xs text-[var(--onboarding-text-secondary)]">
+        <p className="max-w-md text-sm leading-relaxed text-[var(--onboarding-text-secondary)]">
           すべてのノート・文字起こしは個人の Notion データベースに保存されます。まず Notion アカウントを連携してください（必須）。
         </p>
       </div>
 
-      <NotionStorageSettings />
+      <div className="w-full rounded-2xl border border-[var(--onboarding-control-border)] bg-[var(--onboarding-surface)] p-4 shadow-sm">
+        <NotionStorageSettings hideSyncActions />
+      </div>
 
-      <button
-        type="button"
-        onClick={onComplete}
-        disabled={!isReady}
-        className="w-full rounded-xl bg-[var(--onboarding-accent)] px-4 py-2.5 text-sm font-semibold text-[var(--onboarding-accent-foreground)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {isReady ? "次へ（モデル / API の選択へ）" : "Notion を有効にして設定を保存すると次へ進めます"}
-      </button>
+      <div className="pb-2">
+        <Button
+          type="button"
+          onClick={onComplete}
+          disabled={!isReady}
+          className="h-10 w-full rounded-[38px] text-sm font-medium"
+        >
+          {isReady ? "次へ（セットアップ選択へ）" : "Notion を有効にして設定を保存すると次へ進めます"}
+        </Button>
+      </div>
     </div>
   );
 };

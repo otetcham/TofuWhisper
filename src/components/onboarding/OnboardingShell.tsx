@@ -270,7 +270,7 @@ export default function OnboardingShell({
           // h-full, not min-h-full: a percentage height only resolves against a
           // parent with a definite height, so min-h-full would collapse any
           // flex-1 descendant back to content height and overflow the shell.
-          className={`onboarding-step-enter mx-auto flex h-full w-full justify-center ${
+          className={`onboarding-step-enter mx-auto flex ${stepKey === "auth" ? "min-h-full" : "h-full"} w-full justify-center ${
             compact ? "max-w-none items-center" : "max-w-6xl items-stretch"
           }`}
         >

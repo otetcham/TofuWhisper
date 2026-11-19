@@ -113,12 +113,12 @@
     "parakeet-tdt-ctc-0.6b-ja": {
       "name": "Parakeet TDT-CTC 0.6B Japanese (日本語特化)",
       "description": "Fast Japanese-specialized NVIDIA Parakeet TDT-CTC 0.6B ASR",
-      "size": "650MB",
-      "sizeMb": 650,
+      "size": "467MB",
+      "sizeMb": 467,
       "language": "ja",
       "supportedLanguages": ["ja"],
-      "downloadUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet_tdt_ctc_0.6b-ja-35000-int8.tar.bz2",
-      "extractDir": "sherpa-onnx-nemo-parakeet_tdt_ctc_0.6b-ja-35000-int8",
+      "downloadUrl": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-tdt_ctc-0.6b-ja-35000-int8.tar.bz2",
+      "extractDir": "sherpa-onnx-nemo-parakeet-tdt_ctc-0.6b-ja-35000-int8",
       "sherpaModelType": "nemo_transducer"
     },
     "parakeet-tdt-0.6b-v3": {

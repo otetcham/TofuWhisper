@@ -791,9 +791,10 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   // The local setup step owns its forward action: its Proceed finishes onboarding,
   // writing the settings for the switches the user left on as it does.
   const proceedLocalSetup = useCallback(
-    async (handOff: () => LocalSetupHandOff) => {
-      if (!localSetupPlan) return;
-      await proceedWithLocalSetup(localSetupPlan, handOff, (beforeComplete) =>
+    async (handOff: () => LocalSetupHandOff, chosenPlan?: LocalSetupPlan) => {
+      const planToUse = chosenPlan ?? localSetupPlan;
+      if (!planToUse) return;
+      await proceedWithLocalSetup(planToUse, handOff, (beforeComplete) =>
         finalizeOnboarding("local", beforeComplete)
       );
     },
@@ -965,7 +966,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     switch (currentStepId) {
       case "auth":
         return (
-          <div className="min-h-full w-full">
+          <div className="flex min-h-full w-full flex-col items-center justify-center">
             <NotionOnboardingStep
               onComplete={() => {
                 setReturnedToAuth(false);
@@ -1332,7 +1333,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             {localSetupPlan ? (
               <LocalSetupStep
                 plan={localSetupPlan}
-                onProceed={(handOff) => void proceedLocalSetup(handOff)}
+                onProceed={(handOff, chosenPlan) => void proceedLocalSetup(handOff, chosenPlan)}
               />
             ) : (
               <LocalSetupStepPlaceholder
@@ -1351,6 +1352,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const inlineGatedStep = hotkeyStep || demoStep;
   const choiceStep = currentStepId === "setup-choice";
   const inlineProviderStep =
+    currentStepId === "auth" ||
     currentStepId === "byok-dictation" ||
     currentStepId === "byok-assistant" ||
     currentStepId === "local-setup";
@@ -1398,7 +1400,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         skipLabel={t("common.skip")}
         continueDisabled={!canContinue}
         continueLoading={isFinishing || isRegistering || setupDecisionPending}
-        progress={getOnboardingProgress(currentStepId, route)}
+        progress={currentStepId === "auth" ? null : getOnboardingProgress(currentStepId, route)}
         // Label Back only when it is the sole footer action. Unlike the source
         // commit, this branch also has demo Skip, so Back stays icon-only there.
         showBackLabel={!showsContinue && !showsSkip}

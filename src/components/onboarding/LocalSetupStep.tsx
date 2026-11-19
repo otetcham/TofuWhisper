@@ -7,6 +7,7 @@
 // Settings are only written by onProceed.
 import { useMemo, useState, type ReactElement } from "react";
 import { useTranslation } from "react-i18next";
+import { getParakeetModels, getWhisperModels } from "../../models/ModelRegistry";
 import { Button } from "../ui/button";
 import { ProviderIcon } from "../ui/ProviderIcon";
 import { Check, Globe, Laptop, Monitor } from "../icons";
@@ -370,10 +371,74 @@ export function LocalSetupStep({
 }: {
   plan: LocalSetupPlan;
   /** handOff is taken once onboarding can finish, so a failed finish leaves the downloads here. */
-  onProceed: (handOff: () => LocalSetupHandOff) => void;
+  onProceed: (handOff: () => LocalSetupHandOff, chosenPlan?: LocalSetupPlan) => void;
 }): ReactElement {
   const { t } = useTranslation();
   const { space, settled: spaceSettled } = useLocalSetupSpace();
+
+  const dictationOptions = useMemo(() => {
+    const options: Array<{
+      key: string;
+      kind: "whisper" | "parakeet";
+      id: string;
+      name: string;
+      size: string;
+      bytes: number;
+      providerIcon: string;
+    }> = [];
+    for (const [id, m] of Object.entries(getParakeetModels())) {
+      options.push({
+        key: `parakeet:${id}`,
+        kind: "parakeet",
+        id,
+        name: m.name,
+        size: m.size,
+        bytes: (m.sizeMb ?? 500) * 1_000_000,
+        providerIcon: "nvidia",
+      });
+    }
+    for (const [id, m] of Object.entries(getWhisperModels())) {
+      options.push({
+        key: `whisper:${id}`,
+        kind: "whisper",
+        id,
+        name: m.name,
+        size: m.size,
+        bytes: (m.sizeMb ?? 500) * 1_000_000,
+        providerIcon: "openai",
+      });
+    }
+    return options;
+  }, []);
+
+  const defaultDictationRow = plan.rows.find((r) => r.id === "dictation");
+  const defaultDictationKey = defaultDictationRow
+    ? `${defaultDictationRow.download.kind}:${defaultDictationRow.download.id}`
+    : dictationOptions[0]?.key ?? "";
+  const [selectedDictationKey, setSelectedDictationKey] = useState<string>(defaultDictationKey);
+
+  const effectivePlan = useMemo<LocalSetupPlan>(() => {
+    const chosen = dictationOptions.find((o) => o.key === selectedDictationKey);
+    if (!chosen) return plan;
+    return {
+      ...plan,
+      rows: plan.rows.map((row) =>
+        row.id === "dictation"
+          ? {
+              ...row,
+              modelId: chosen.id,
+              modelName: chosen.name,
+              providerIcon: chosen.providerIcon,
+              download: { kind: chosen.kind, id: chosen.id, bytes: chosen.bytes },
+              label: "fast",
+              reason: undefined,
+              line: null,
+            }
+          : row
+      ),
+    };
+  }, [plan, dictationOptions, selectedDictationKey]);
+
   // Switches the user set. Empty until the first flip, so the space fit may turn
   // rows off; after a flip it holds both, so the fit never overrides the user.
   const [requested, setRequested] = useState<Partial<LocalSetupSwitches>>({});
@@ -393,25 +458,25 @@ export function LocalSetupStep({
     // frame because what is on disk wasn't known yet.
     const isOnDisk = (item: LocalSetupDownload): boolean =>
       onDisk.includes(localSetupItemKey(item));
-    if (space && inventoryLoaded) return fitLocalSetupToSpace(plan, requested, space, isOnDisk);
+    if (space && inventoryLoaded) return fitLocalSetupToSpace(effectivePlan, requested, space, isOnDisk);
     // Not read yet: everything fits until the reads say otherwise.
     return {
-      switches: { ...plan.startingSwitches, ...requested },
+      switches: { ...effectivePlan.startingSwitches, ...requested },
       autoOff: [],
       state: "fits",
       requiredBytes: 0,
     };
-  }, [plan, requested, space, onDisk, inventoryLoaded]);
+  }, [effectivePlan, requested, space, onDisk, inventoryLoaded]);
   const fit = frozenFit ?? liveFit;
   const { switches } = fit;
 
-  const downloads = useLocalSetupDownloads(plan, switches);
+  const downloads = useLocalSetupDownloads(effectivePlan, switches);
   // Adjusting state during render: React re-renders straight away with the new
   // inventory, before anything is committed, so the fit never shows stale rows.
   if (downloads.onDisk !== onDisk) setOnDisk(downloads.onDisk);
   if (downloads.inventoryLoaded !== inventoryLoaded) setInventoryLoaded(downloads.inventoryLoaded);
-  const queue = useMemo(() => enabledDownloads(plan, switches), [plan, switches]);
-  const onMac = plan.profile.platform === "darwin";
+  const queue = useMemo(() => enabledDownloads(effectivePlan, switches), [effectivePlan, switches]);
+  const onMac = effectivePlan.profile.platform === "darwin";
 
   const offToFit = [...fit.autoOff, ...keptOffToFit].filter(
     (id) => id !== "dictation" && !switches[id]
@@ -423,7 +488,7 @@ export function LocalSetupStep({
   // Download waits for the free-space read and the inventory, or it would freeze a
   // fit that hasn't seen either.
   const readsLanded = spaceSettled && inventoryLoaded;
-  const currentDictation = plan.rows.find((row) => row.id === "dictation");
+  const currentDictation = effectivePlan.rows.find((row) => row.id === "dictation");
   // Retirement stops new downloads, but a transfer already started can finish and
   // keep working. A different model or an organization block must still stop Proceed.
   const completedRetiredDictation =
@@ -459,7 +524,7 @@ export function LocalSetupStep({
 
   const press = (): void => {
     if (phase === "proceed") {
-      onProceed(downloads.handOff);
+      onProceed(downloads.handOff, effectivePlan);
     } else if (phase === "download") {
       setFrozenFit(liveFit);
       setStartedDictation(currentDictation ?? null);
@@ -507,10 +572,32 @@ export function LocalSetupStep({
 
   return (
     <section className={CARD_CLASS}>
-      <ComputerCard profile={plan.profile} languageTags={plan.languageTags} />
+      <ComputerCard profile={effectivePlan.profile} languageTags={effectivePlan.languageTags} />
+
+      <div className={`mt-4 ${PANEL_CLASS} px-3.5 py-3`}>
+        <label
+          htmlFor="local-dictation-model-select"
+          className="block text-xs font-medium text-[var(--onboarding-text-secondary)] mb-1.5"
+        >
+          ダウンロードする音声認識モデルを選択
+        </label>
+        <select
+          id="local-dictation-model-select"
+          value={selectedDictationKey}
+          disabled={downloads.started}
+          onChange={(e) => setSelectedDictationKey(e.target.value)}
+          className="w-full rounded-xl border border-[var(--onboarding-control-border)] bg-[var(--onboarding-surface)] px-3 py-2 text-sm text-[var(--onboarding-text-primary)] outline-none disabled:opacity-60"
+        >
+          {dictationOptions.map((opt) => (
+            <option key={opt.key} value={opt.key}>
+              {opt.name} ({opt.size})
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className={`mt-4 ${PANEL_CLASS}`}>
-        {plan.rows.map((planRow) => {
+        {effectivePlan.rows.map((planRow) => {
           const row =
             planRow.id === "dictation" && completedRetiredDictation
               ? completedRetiredDictation

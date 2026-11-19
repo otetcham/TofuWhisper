@@ -15,7 +15,13 @@ interface NotionConfig {
   lastSyncedAt: string | null;
 }
 
-export const NotionStorageSettings: React.FC = () => {
+export interface NotionStorageSettingsProps {
+  hideSyncActions?: boolean;
+}
+
+export const NotionStorageSettings: React.FC<NotionStorageSettingsProps> = ({
+  hideSyncActions = false,
+}) => {
   const [config, setConfig] = useState<NotionConfig | null>(null);
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [databaseIdInput, setDatabaseIdInput] = useState("");
@@ -210,22 +216,26 @@ export const NotionStorageSettings: React.FC = () => {
             <Button size="sm" variant="outline" onClick={handleTest} disabled={isTesting}>
               {isTesting ? "テスト中..." : "接続テスト"}
             </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleSyncAll}
-              disabled={isSyncing || !config?.enabled}
-            >
-              {isSyncing ? "同期中..." : "すべてNotionへ同期"}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handlePullAll}
-              disabled={isPulling || !config?.enabled}
-            >
-              {isPulling ? "取得中..." : "Notionから取得"}
-            </Button>
+            {!hideSyncActions && (
+              <>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleSyncAll}
+                  disabled={isSyncing || !config?.enabled}
+                >
+                  {isSyncing ? "同期中..." : "すべてNotionへ同期"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handlePullAll}
+                  disabled={isPulling || !config?.enabled}
+                >
+                  {isPulling ? "取得中..." : "Notionから取得"}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </SettingsPanelRow>
